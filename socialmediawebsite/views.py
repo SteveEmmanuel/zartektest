@@ -1,12 +1,14 @@
 import datetime
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render
 from django.views import View
 from .models import Post, PostImage
 from .forms import PostForm
 
-class PostListView(LoginRequiredMixin, View):
+class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = 'socialmediawebsite.can_add_post'
+
     def get(self, request, *args, **kwargs):
         logged_in_user = request.user
 
