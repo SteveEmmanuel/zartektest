@@ -6,6 +6,7 @@ from django.views import View
 from .models import Post, PostImage
 from .forms import PostForm
 
+
 class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = 'socialmediawebsite.can_add_post'
 
@@ -14,7 +15,6 @@ class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
 
         posts = Post.objects.all()
         form = PostForm()
-
         context = {
             'post_list': posts,
             'form': form,
