@@ -17,12 +17,16 @@ class PostViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post']
 
     def list(self, request):
-        serializer = PostSerializer(self.queryset, many=True)
+        serializer = PostSerializer(self.queryset, many=True, context={
+            'request': request
+        })
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        post = get_object_or_404(self.queryset, pk=pk)
-        serializer = PostSerializer(post)
+        post = get_object_or_404(self.queryset, pk=pk, )
+        serializer = PostSerializer(post, context={
+            'request': request
+        })
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], url_path='like')
@@ -33,10 +37,10 @@ class PostViewSet(viewsets.ModelViewSet):
         logged_in_user = request.user
 
         if logged_in_user in post.likes.all():
-            #user has already liked the post
+            # user has already liked the post
             pass
         elif logged_in_user in post.dislikes.all():
-            #user has disliked the post
+            # user has disliked the post
             post.dislikes.remove(logged_in_user)
 
         post.likes.add(logged_in_user)
@@ -50,10 +54,10 @@ class PostViewSet(viewsets.ModelViewSet):
         logged_in_user = request.user
 
         if logged_in_user in post.dislikes.all():
-            #user has already disliked the post
+            # user has already disliked the post
             pass
         elif logged_in_user in post.likes.all():
-            #user has liked the post
+            # user has liked the post
             post.likes.remove(logged_in_user)
 
         post.dislikes.add(logged_in_user)
