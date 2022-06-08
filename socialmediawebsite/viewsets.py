@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Post
-from .serializers import PostSerializer
+from .serializers import PostSerializer, LikedUserSerializer
 from rest_framework.response import Response
 
 
@@ -29,10 +29,18 @@ class PostViewSet(viewsets.ModelViewSet):
         })
         return Response(serializer.data)
 
+    @action(detail=True, url_path='likedusers')
+    def liked_users(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        users = post.likes.all()
+        serializer = LikedUserSerializer(users, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'], url_path='like')
     def like_post(self, request, pk=None):
         post = get_object_or_404(self.queryset, pk=pk)
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={
+            'request': request})
 
         logged_in_user = request.user
 
@@ -49,7 +57,8 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='dislike')
     def dislike_post(self, request, pk=None):
         post = get_object_or_404(self.queryset, pk=pk)
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={
+            'request': request})
 
         logged_in_user = request.user
 

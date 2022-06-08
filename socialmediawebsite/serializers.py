@@ -32,3 +32,6 @@ class PostSerializer(serializers.Serializer):
         if current_user in post.dislikes.all():
             dislike_status = True
         return dislike_status
+
+class LikedUserSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
