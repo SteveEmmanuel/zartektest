@@ -6,7 +6,7 @@ from .models import Post
 from .serializers import PostSerializer
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostListViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
