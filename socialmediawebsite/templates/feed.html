@@ -26,6 +26,8 @@
             </div>
         {% endfor %}
         </div>
+        <p>Likes - {{ post.likes.length|default:"0" }}</p>
+        <p>Dislikes - {{ post.dislikes.length|default:"0"  }}</p>
         {% endif %}
     {% endfor %}
 </body>
