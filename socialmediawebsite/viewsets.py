@@ -9,6 +9,7 @@ from .serializers import PostSerializer
 class PostViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+    http_method_names = ['get']
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
