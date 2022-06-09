@@ -3,71 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <title>Feed</title>
-    <script
-            src="https://code.jquery.com/jquery-3.6.0.js"
-            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
             crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
-<li>User: {{ user.get_username }}</li>
-<li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">Tagging System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form}}
-{{ formset.management_form }}
-<div id="form_set">
-    {{ formset_error_message }}
-    {% for form in formset.forms %}
-	    {{form.non_field_errors}}
-		{{form.errors}}
-        <table class='no_error'>
-            {{ form }}
-        </table>
-    {% endfor %}
-</div>
-        <input type="button" value="Add More" id="add_more">
-    <div class="d-grid gap-2">
-        <button class="btn btn-success mt-3">Submit!</button>
-    </div>
-</form>
-{% for post in post_list %}
-    <p>{{ post.description }}</p>
-    <p>{{ post.datetime }}</p>
-    {% if post.images.count > 0 %}
-        <div class="row">
-        {% for img in post.images.all %}
-            <div class="col-md-4 col-xs-12">
-                <img src="{{ img.image.url }}" class="post-image"/>
-            </div>
-        {% endfor %}
+    <div class="collapse navbar-collapse " id="navbarSupportedContent">
+        <div class="my-2 my-lg-0">
+            <span class="navbar-text font-weight-light ">Hello,</span>
+            <span class="navbar-text font-weight-normal ">{{ user.get_username }}</span>
+            <a class="btn btn-outline-success my-2 my-sm-0" href="{% url 'logout'%}?next={{request.path}}">Logout</a>
         </div>
-    {% endif %}
-    {% for post_tag in post.post_tags.all %}
-        <p>Tag - {{ post_tag.tag.name }}, weight - {{ post_tag.weight }}</p>
+    </div>
+</nav>
+<div>
+    {% load crispy_forms_tags %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div id="form_set">
+            {{ formset.management_form }}
+            {{ formset_error_message }}
+            {% for form in formset.forms %}
+            {{form.non_field_errors}}
+            {{form.errors}}
+            <table class='no_error'>
+                {{ form|crispy }}
+            </table>
+            {% endfor %}
+        </div>
+        <input type="button" value="Add More" id="add_more">
+        <div class="d-grid gap-2">
+            <button class="btn btn-success mt-3">Submit!</button>
+        </div>
+    </form>
+
+    {% for post in post_list %}
+
+
+    <div class="card m-5">
+        <div class="card-header">
+            {{ post.author }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ post.description }}</h5>
+            <div id="carousel{{ post.pk }}" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    {% for img in post.images.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img.image.url }}" class="post-image d-block w-100" alt="...">
+                    </div>
+                    {% endfor %}
+                </div>
+                <a class="carousel-control-prev" href="#carousel{{ post.pk }}" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carousel{{ post.pk }}" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            <p>Likes - {{ post.likes.count|default:"0" }}</p>
+            <p>Dislikes - {{ post.dislikes.count|default:"0" }}</p>
+        </div>
+    </div>
+
     {% endfor %}
 
-    <p>Likes - {{ post.likes.count|default:"0" }}</p>
-    <p>Dislikes - {{ post.dislikes.count|default:"0" }}</p>
-{% endfor %}
+</div>
+
 <div id="empty_form" style="display:none">
     <table class='no_error'>
         {{ formset.management_form }}
-        {{ formset.empty_form }}
+        {{ formset.empty_form|crispy }}
     </table>
 </div>
+
 </body>
 <script>
 $(document).ready(function() {
-debugger;
-$('#id_form-INITIAL_FORMS').val(1);
-$('#add_more').click(function() {
-	var form_idx = $('#id_form-TOTAL_FORMS').val();
-	$('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
-	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-});
-});
+    $('.carousel').carousel();
 
-
+    $('#id_form-INITIAL_FORMS').val(1);
+    $('#add_more').click(function() {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+});
 </script>
 </html>
