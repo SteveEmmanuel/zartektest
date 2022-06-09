@@ -1,11 +1,22 @@
 import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.forms import formset_factory
+from django.forms import formset_factory, BaseFormSet, ValidationError
 from django.shortcuts import render
 from django.views import View
 from .models import Post, PostImage, PostTag, Tag
 from .forms import PostForm, TagForm
+
+
+class CustomFormset(BaseFormSet):
+
+    def clean(self):
+        weight_sum = 0
+        for tag in self.cleaned_data:
+            if tag['name'] != '':
+                weight_sum += tag['weight']
+        if weight_sum != 100:
+            raise ValidationError("The sum total of weight should be 100")
 
 
 class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -17,7 +28,7 @@ class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
         posts = Post.objects.all()
         form = PostForm()
 
-        TagFormSet = formset_factory(TagForm)
+        TagFormSet = formset_factory(TagForm, formset=CustomFormset)
         tag_formset = TagFormSet()
 
         context = {
@@ -33,7 +44,7 @@ class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
         posts = Post.objects.all()
         form = PostForm(request.POST, request.FILES)
 
-        TagFormSet = formset_factory(TagForm)
+        TagFormSet = formset_factory(TagForm, formset=CustomFormset)
         tag_formset = TagFormSet(data=request.POST)
 
         files = request.FILES.getlist('image')
@@ -62,12 +73,14 @@ class PostListView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 post_tag = PostTag(tag=tag, weight=weight, post=new_post)
                 post_tag.save()
 
-        TagFormSet = formset_factory(TagForm)
-        tag_formset = TagFormSet()
+        formset_error_message = ""
+        if not tag_formset.is_valid():
+            formset_error_message = "Tag name and weight cannot be blank and sum of weights should be 100"
 
         context = {
             'post_list': posts,
             'form': form,
             'formset': tag_formset,
+            'formset_error_message': formset_error_message
         }
         return render(request, 'feed.html', context)
