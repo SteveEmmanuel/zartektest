@@ -14,7 +14,7 @@ class PostImage(models.Model):
 class Post(models.Model):
     """Model representing a Post."""
 
-    description = models.TextField(max_length=1000, null=False, help_text='Enter a brief description of the post')
+    description = models.TextField(max_length=1000, null=False)
 
     author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
