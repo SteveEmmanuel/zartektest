@@ -3,32 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <title>Feed</title>
+    <script
+            src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+            crossorigin="anonymous"></script>
 </head>
 <body>
-     <li>User: {{ user.get_username }}</li>
-     <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+<li>User: {{ user.get_username }}</li>
+<li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form }}
-        <div class="d-grid gap-2">
-            <button class="btn btn-success mt-3">Submit!</button>
-        </div>
-    </form>
-    {% for post in post_list %}
-        <p>{{ post.description }}</p>
-        <p>{{ post.datetime }}</p>
-        {% if post.images.count > 0 %}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form}}
+{{ formset.management_form }}
+<div id="form_set">
+    {{ formset_error_message }}
+    {% for form in formset.forms %}
+	    {{form.non_field_errors}}
+		{{form.errors}}
+        <table class='no_error'>
+            {{ form }}
+        </table>
+    {% endfor %}
+</div>
+        <input type="button" value="Add More" id="add_more">
+    <div class="d-grid gap-2">
+        <button class="btn btn-success mt-3">Submit!</button>
+    </div>
+</form>
+{% for post in post_list %}
+    <p>{{ post.description }}</p>
+    <p>{{ post.datetime }}</p>
+    {% if post.images.count > 0 %}
         <div class="row">
         {% for img in post.images.all %}
             <div class="col-md-4 col-xs-12">
-                <img src="{{ img.image.url }}" class="post-image" />
+                <img src="{{ img.image.url }}" class="post-image"/>
             </div>
         {% endfor %}
         </div>
-        <p>Likes - {{ post.likes.length|default:"0" }}</p>
-        <p>Dislikes - {{ post.dislikes.length|default:"0"  }}</p>
-        {% endif %}
+    {% endif %}
+    {% for post_tag in post.post_tags.all %}
+        <p>Tag - {{ post_tag.tag.name }}, weight - {{ post_tag.weight }}</p>
     {% endfor %}
+
+    <p>Likes - {{ post.likes.count|default:"0" }}</p>
+    <p>Dislikes - {{ post.dislikes.count|default:"0" }}</p>
+{% endfor %}
+<div id="empty_form" style="display:none">
+    <table class='no_error'>
+        {{ formset.management_form }}
+        {{ formset.empty_form }}
+    </table>
+</div>
 </body>
+<script>
+$(document).ready(function() {
+debugger;
+$('#id_form-INITIAL_FORMS').val(1);
+$('#add_more').click(function() {
+	var form_idx = $('#id_form-TOTAL_FORMS').val();
+	$('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+});
+});
+
+
+</script>
 </html>
