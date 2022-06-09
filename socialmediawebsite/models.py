@@ -23,3 +23,13 @@ class Post(models.Model):
     likes = models.ManyToManyField(User, blank=True, related_name='likes')
     dislikes = models.ManyToManyField(User, blank=True, related_name='dislikes')
 
+
+class Tag(models.Model):
+    name = models.CharField(max_length=25, null=False)
+
+
+class PostTag(models.Model):
+    tag = models.ForeignKey('Tag', on_delete=models.CASCADE, null=False, related_name='post_tags')
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, null=False, related_name='post_tags')
+
+    weight = models.IntegerField(null=False)
